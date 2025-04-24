@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Koi Fish Tank (3D Style)</title>
+  <style>
+    body {
+      background: radial-gradient(circle at center, #1e3a8a 0%, #0d1b4c 100%);
+      color: white;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      padding-top: 40px;
+    }
+
+    canvas {
+      background: radial-gradient(circle at center, #a2d8ff, #5eaee2);
+      border: 10px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: inset 0 0 40px rgba(255,255,255,0.2), 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #ffe175;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Feed the Koi</h1>
+  <canvas id="fishCanvas" width="500" height="500"></canvas>
+  <br>
+  <a href="index.html">← Back to Home</a>
+
+  <script>
+    const canvas = document.getElementById("fishCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let fish = {
+      x: 250,
+      y: 250,
+      direction: 1,
+      speed: 1.2,
+    };
+
+    let foods = [];
+
+    function drawCastle3D() {
+      // Front wall
+      ctx.fillStyle = "#996633";
+      ctx.fillRect(180, 360, 140, 90);
+
+      // Right tower (front)
+      ctx.fillStyle = "#b36b00";
+      ctx.fillRect(310, 330, 20, 60);
+
+      // Left tower (front)
+      ctx.fillStyle = "#b36b00";
+      ctx.fillRect(170, 330, 20, 60);
+
+      // Roofs
+      ctx.fillStyle = "#cc3333";
+      ctx.beginPath();
+      ctx.moveTo(170, 330);
+      ctx.lineTo(180, 310);
+      ctx.lineTo(190, 330);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(310, 330);
+      ctx.lineTo(320, 310);
+      ctx.lineTo(330, 330);
+      ctx.fill();
+
+      // Shadows
+      ctx.fillStyle = "#704214";
+      ctx.fillRect(180, 360, 20, 90);
+    }
+
+    function drawKoiFish3D() {
+      ctx.save();
+      ctx.translate(fish.x, fish.y);
+      if (fish.direction === -1) ctx.scale(-1, 1);
+
+      // Gradient for fish body
+      const gradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 40);
+      gradient.addColorStop(0, "#fff2cc");
+      gradient.addColorStop(1, "#ffa500");
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 40, 18, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tail
+      ctx.fillStyle = "#ffae42";
+      ctx.beginPath();
+      ctx.moveTo(-40, 0);
+      ctx.lineTo(-55, -10);
+      ctx.lineTo(-55, 10);
+      ctx.closePath();
+      ctx.fill();
+
+      // Koi spots (semi-randomized look)
+      ctx.fillStyle = "#e63946";
+      ctx.beginPath();
+      ctx.arc(-10, -6, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(8, 6, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eye
+      ctx.fillStyle = "black";
+      ctx.beginPath();
+      ctx.arc(15, -5, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawFood() {
+      ctx.fillStyle = "#5c3a21";
+      foods.forEach(food => {
+        ctx.beginPath();
+        ctx.arc(food.x, food.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function updateFood() {
+      foods.forEach(food => {
+        food.y += 1.5;
+      });
+
+      foods = foods.filter(food => {
+        let dx = food.x - fish.x;
+        let dy = food.y - fish.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        return distance >= 25 && food.y < canvas.height;
+      });
+    }
+
+    function updateFish() {
+      fish.x += fish.speed * fish.direction;
+      if (fish.x > canvas.width - 50 || fish.x < 50) {
+        fish.direction *= -1;
+      }
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawCastle3D();
+      drawKoiFish3D();
+      drawFood();
+      updateFish();
+      updateFood();
+
+      requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener("click", e => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      foods.push({ x: x, y: 0 });
+    });
+
+    loop();
+  </script>
+</body>
+</html>
